@@ -33,6 +33,7 @@
 
 #include "core/io/config_file.h"
 #include "scene/gui/box_container.h"
+#include "scene/gui/menu_button.h"
 #include "scene/gui/scroll_container.h"
 
 class Button;
@@ -42,11 +43,24 @@ class TextureButton;
 class TextureRect;
 
 class ProjectListItemControl : public HBoxContainer {
-	GDCLASS(ProjectListItemControl, HBoxContainer)
+	GDCLASS(ProjectListItemControl, HBoxContainer);
+
+	int current_option = -1;
+	enum MenuOptions {
+		TEST_METHOD,
+		TEST_METHOD_2,
+		TEST_METHOD_3,
+		TEST_METHOD_4,
+		TEST_METHOD_5
+	};
 
 	VBoxContainer *main_vbox = nullptr;
-	TextureButton *favorite_button = nullptr;
+	Button *favorite_button = nullptr;
 	Button *explore_button = nullptr;
+	MenuButton *ellipsis_button = nullptr;
+	Button *run_button = nullptr;
+
+	PopupMenu *ellipsis_popup = nullptr;
 
 	TextureRect *project_icon = nullptr;
 	Label *project_title = nullptr;
@@ -62,9 +76,16 @@ class ProjectListItemControl : public HBoxContainer {
 	void _favorite_button_pressed();
 	void _explore_button_pressed();
 
+	void _menu_option(int p_option);
+	void _menu_confirm_current();
+	void _menu_option_confirm(int p_option, bool p_confirmed);
+
 protected:
 	void _notification(int p_what);
 	static void _bind_methods();
+
+private:
+	void _tree_rmb_select(const Vector2 &p_pos, MouseButton p_button);
 
 public:
 	void set_project_title(const String &p_title);
@@ -176,6 +197,7 @@ private:
 	static Item load_project_data(const String &p_property_key, bool p_favorite);
 	void _update_icons_async();
 	void _load_project_icon(int p_index);
+
 
 	// Project list updates.
 

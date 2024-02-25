@@ -54,16 +54,28 @@ void ProjectListItemControl::_notification(int p_what) {
 				project_icon->set_texture(get_editor_theme_icon(SNAME("ProjectIconLoading")));
 			}
 
+			ellipsis_popup = ellipsis_button->get_popup();
+			ellipsis_popup->set_item_icon(ellipsis_popup->get_item_index(TEST_METHOD), get_editor_theme_icon(SNAME("Edit")));
+			ellipsis_popup->set_item_icon(ellipsis_popup->get_item_index(TEST_METHOD_2), get_editor_theme_icon(SNAME("Play")));
+			ellipsis_popup->set_item_icon(ellipsis_popup->get_item_index(TEST_METHOD_3), get_editor_theme_icon(SNAME("Rename")));
+			ellipsis_popup->set_item_icon(ellipsis_popup->get_item_index(TEST_METHOD_4), get_editor_theme_icon(SNAME("Tag")));
+			ellipsis_popup->set_item_icon(ellipsis_popup->get_item_index(TEST_METHOD_5), get_editor_theme_icon(SNAME("Remove")));
+
+
+			/* ellipsis_pop.get_item_index()->connect("pressed", callable_mp(this, &ProjectManager::_open_selected_projects_ask)); */
+
 			project_title->begin_bulk_theme_override();
 			project_title->add_theme_font_override("font", get_theme_font(SNAME("title"), EditorStringName(EditorFonts)));
-			project_title->add_theme_font_size_override("font_size", get_theme_font_size(SNAME("title_size"), EditorStringName(EditorFonts)));
 			project_title->add_theme_color_override("font_color", get_theme_color(SNAME("font_color"), SNAME("Tree")));
 			project_title->end_bulk_theme_override();
 
 			project_path->add_theme_color_override("font_color", get_theme_color(SNAME("font_color"), SNAME("Tree")));
 			project_unsupported_features->set_texture(get_editor_theme_icon(SNAME("NodeWarning")));
 
-			favorite_button->set_texture_normal(get_editor_theme_icon(SNAME("Favorites")));
+			ellipsis_button->set_icon(get_editor_theme_icon(SNAME("GuiTabMenuHl")));
+			favorite_button->set_icon(get_editor_theme_icon(SNAME("Favorites")));
+			run_button->set_icon(get_editor_theme_icon(SNAME("Play")));
+
 			if (project_is_missing) {
 				explore_button->set_icon(get_editor_theme_icon(SNAME("FileBroken")));
 			} else {
@@ -189,14 +201,7 @@ void ProjectListItemControl::set_is_missing(bool p_missing) {
 }
 
 void ProjectListItemControl::set_is_grayed(bool p_grayed) {
-	if (p_grayed) {
-		main_vbox->set_modulate(Color(1, 1, 1, 0.5));
-		// Don't make the icon less prominent if the parent is already grayed out.
-		explore_button->set_modulate(Color(1, 1, 1, 1.0));
-	} else {
-		main_vbox->set_modulate(Color(1, 1, 1, 1.0));
-		explore_button->set_modulate(Color(1, 1, 1, 0.5));
-	}
+	main_vbox->set_modulate(p_grayed ? Color(1, 1, 1, 0.5) : Color(1, 1, 1, 1.0));
 }
 
 void ProjectListItemControl::_bind_methods() {
@@ -206,17 +211,6 @@ void ProjectListItemControl::_bind_methods() {
 
 ProjectListItemControl::ProjectListItemControl() {
 	set_focus_mode(FocusMode::FOCUS_ALL);
-
-	VBoxContainer *favorite_box = memnew(VBoxContainer);
-	favorite_box->set_alignment(BoxContainer::ALIGNMENT_CENTER);
-	add_child(favorite_box);
-
-	favorite_button = memnew(TextureButton);
-	favorite_button->set_name("FavoriteButton");
-	// This makes the project's "hover" style display correctly when hovering the favorite icon.
-	favorite_button->set_mouse_filter(MOUSE_FILTER_PASS);
-	favorite_box->add_child(favorite_button);
-	favorite_button->connect("pressed", callable_mp(this, &ProjectListItemControl::_favorite_button_pressed));
 
 	project_icon = memnew(TextureRect);
 	project_icon->set_name("ProjectIcon");
@@ -232,10 +226,63 @@ ProjectListItemControl::ProjectListItemControl() {
 	ec->set_mouse_filter(MOUSE_FILTER_PASS);
 	main_vbox->add_child(ec);
 
-	// Top half, title, tags and unsupported features labels.
+	HBoxContainer *project_button_box = memnew(HBoxContainer);
+	add_child(project_button_box);
+	project_button_box->set_alignment(BoxContainer::ALIGNMENT_CENTER);
+
+	{
+		project_unsupported_features = memnew(TextureRect);
+		project_unsupported_features->set_name("ProjectUnsupportedFeatures");
+		project_unsupported_features->set_stretch_mode(TextureRect::STRETCH_KEEP_CENTERED);
+		project_button_box->add_child(project_unsupported_features);
+		project_unsupported_features->hide();
+
+		Control *first_spacer = memnew(Control);
+		first_spacer->set_custom_minimum_size(Size2(10, 10));
+		project_button_box->add_child(first_spacer);
+
+		tag_container = memnew(HBoxContainer);
+		project_button_box->add_child(tag_container);
+		project_button_box->set_v_size_flags(SIZE_SHRINK_CENTER);
+
+		Control *second_spacer = memnew(Control);
+		second_spacer->set_custom_minimum_size(Size2(10, 10));
+		project_button_box->add_child(second_spacer);
+
+		run_button = memnew(Button);
+		run_button->set_name("PlayButton");
+		run_button->set_mouse_filter(MOUSE_FILTER_PASS);
+		project_button_box->add_child(run_button);
+		run_button->connect("pressed", callable_mp(this, &ProjectListItemControl::_explore_button_pressed));
+
+		ellipsis_button = memnew(MenuButton);
+		ellipsis_button->set_name("EllipsisButton");
+		ellipsis_button->set_mouse_filter(MOUSE_FILTER_PASS);
+		project_button_box->add_child(ellipsis_button);
+		ellipsis_button->get_popup()->add_shortcut(ED_SHORTCUT("project_manager/edit_project", TTR("Edit Project"), KeyModifierMask::CMD_OR_CTRL | Key::E));
+		ellipsis_button->get_popup()->add_shortcut(ED_SHORTCUT("project_manager/run_project", TTR("Run"), KeyModifierMask::CMD_OR_CTRL | Key::R));
+		ellipsis_button->get_popup()->add_shortcut(ED_SHORTCUT("project_manager/rename_project", TTR("Rename Project"), KeyModifierMask::CMD_OR_CTRL | Key::F2));
+		ellipsis_button->get_popup()->add_shortcut(ED_SHORTCUT("project_manager/manage_tags", TTR("Manage Tags")));
+		ellipsis_button->get_popup()->add_shortcut(ED_SHORTCUT("project_manager/remove_project", TTR("Remove"), Key::KEY_DELETE));
+
+		ellipsis_button->get_popup()->connect("id_pressed", callable_mp(this, &ProjectListItemControl::_menu_option));
+
+		Control *spacer = memnew(Control);
+		spacer->set_custom_minimum_size(Size2(10, 10));
+		project_button_box->add_child(spacer);
+	}
+
+	// Top half, title, and unsupported features labels.
 	{
 		HBoxContainer *title_hb = memnew(HBoxContainer);
 		main_vbox->add_child(title_hb);
+
+		favorite_button = memnew(Button);
+		favorite_button->set_name("FavoriteButton");
+		// This makes the project's "hover" style display correctly when hovering the favorite icon.
+		favorite_button->set_mouse_filter(MOUSE_FILTER_PASS);
+		title_hb->add_child(favorite_button);
+		favorite_button->connect("pressed", callable_mp(this, &ProjectListItemControl::_favorite_button_pressed));
 
 		project_title = memnew(Label);
 		project_title->set_auto_translate_mode(AUTO_TRANSLATE_MODE_DISABLED);
@@ -244,15 +291,12 @@ ProjectListItemControl::ProjectListItemControl() {
 		project_title->set_clip_text(true);
 		title_hb->add_child(project_title);
 
-		tag_container = memnew(HBoxContainer);
-		title_hb->add_child(tag_container);
-
 		Control *spacer = memnew(Control);
 		spacer->set_custom_minimum_size(Size2(10, 10));
 		title_hb->add_child(spacer);
 	}
 
-	// Bottom half, containing the path and view folder button.
+	// Bottom half, containing the path, tags, view folder, run, ellipsis button.
 	{
 		HBoxContainer *path_hb = memnew(HBoxContainer);
 		path_hb->set_h_size_flags(Control::SIZE_EXPAND_FILL);
@@ -260,7 +304,7 @@ ProjectListItemControl::ProjectListItemControl() {
 
 		explore_button = memnew(Button);
 		explore_button->set_name("ExploreButton");
-		explore_button->set_flat(true);
+		explore_button->set_mouse_filter(MOUSE_FILTER_PASS);
 		path_hb->add_child(explore_button);
 		explore_button->connect("pressed", callable_mp(this, &ProjectListItemControl::_explore_button_pressed));
 
@@ -271,17 +315,50 @@ ProjectListItemControl::ProjectListItemControl() {
 		project_path->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 		project_path->set_modulate(Color(1, 1, 1, 0.5));
 		path_hb->add_child(project_path);
-
-		project_unsupported_features = memnew(TextureRect);
-		project_unsupported_features->set_name("ProjectUnsupportedFeatures");
-		project_unsupported_features->set_stretch_mode(TextureRect::STRETCH_KEEP_CENTERED);
-		path_hb->add_child(project_unsupported_features);
-		project_unsupported_features->hide();
-
-		Control *spacer = memnew(Control);
-		spacer->set_custom_minimum_size(Size2(10, 10));
-		path_hb->add_child(spacer);
 	}
+}
+
+void ProjectListItemControl::_menu_option(int p_option) {
+	_menu_option_confirm(p_option, false);
+}
+
+void ProjectListItemControl::_menu_confirm_current() {
+	_menu_option_confirm(current_option, true);
+}
+
+void ProjectListItemControl::_menu_option_confirm(int p_option, bool p_confirmed) {
+	if (!p_confirmed) {
+		current_option = p_option;
+	}
+
+	switch (p_option) {
+		case TEST_METHOD: {
+			_favorite_button_pressed();
+		} break;
+		case TEST_METHOD_2: {
+			_favorite_button_pressed();
+		} break;
+		case TEST_METHOD_3: {
+			_favorite_button_pressed();
+		} break;
+		case TEST_METHOD_4: {
+			_favorite_button_pressed();
+		} break;
+		case TEST_METHOD_5: {
+			_favorite_button_pressed();
+		} break;
+	}
+}
+
+void ProjectListItemControl::_tree_rmb_select(const Vector2 &p_pos, MouseButton p_button) {
+	if (p_button != MouseButton::RIGHT) {
+		return;
+	}
+
+	// Popup.
+	ellipsis_popup->set_position(p_pos);
+	ellipsis_popup->reset_size();
+	ellipsis_popup->popup();
 }
 
 struct ProjectListComparator {

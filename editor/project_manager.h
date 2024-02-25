@@ -77,6 +77,7 @@ class ProjectManager : public Control {
 	VBoxContainer *main_vbox = nullptr;
 
 	HBoxContainer *title_bar = nullptr;
+	HBoxContainer *top_bar = nullptr;
 	Button *title_bar_logo = nullptr;
 	HBoxContainer *main_view_toggles = nullptr;
 	Button *quick_settings_button = nullptr;
@@ -144,12 +145,14 @@ class ProjectManager : public Control {
 	Button *create_btn = nullptr;
 	Button *import_btn = nullptr;
 	Button *scan_btn = nullptr;
-	Button *open_btn = nullptr;
-	Button *run_btn = nullptr;
-	Button *rename_btn = nullptr;
-	Button *manage_tags_btn = nullptr;
-	Button *erase_btn = nullptr;
 	Button *erase_missing_btn = nullptr;
+
+	/* Button *manage_tags_btn = nullptr; */
+
+	/* Button *open_btn = nullptr; */
+	/* Button *rename_btn = nullptr; */
+	/* Button *erase_btn = nullptr; */
+	/* Button *run_btn = nullptr; */
 
 	EditorFileDialog *scan_dir = nullptr;
 

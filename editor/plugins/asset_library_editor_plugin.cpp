@@ -1144,7 +1144,6 @@ HBoxContainer *EditorAssetLibrary::_make_pages(int p_page, int p_page_count, int
 		prev->set_focus_mode(Control::FOCUS_NONE);
 	}
 	hbc->add_child(prev);
-	hbc->add_child(memnew(VSeparator));
 
 	for (int i = from; i < to; i++) {
 		Button *current = memnew(Button);
@@ -1169,7 +1168,6 @@ HBoxContainer *EditorAssetLibrary::_make_pages(int p_page, int p_page_count, int
 		next->set_disabled(true);
 		next->set_focus_mode(Control::FOCUS_NONE);
 	}
-	hbc->add_child(memnew(VSeparator));
 	hbc->add_child(next);
 
 	Button *last = memnew(Button);
@@ -1596,10 +1594,6 @@ EditorAssetLibrary::EditorAssetLibrary(bool p_templates_only) {
 	filter_debounce_timer->connect("timeout", callable_mp(this, &EditorAssetLibrary::_filter_debounce_timer_timeout));
 	search_hb->add_child(filter_debounce_timer);
 
-	if (!p_templates_only) {
-		search_hb->add_child(memnew(VSeparator));
-	}
-
 	Button *open_asset = memnew(Button);
 	open_asset->set_text(TTR("Import..."));
 	search_hb->add_child(open_asset);
@@ -1630,8 +1624,6 @@ EditorAssetLibrary::EditorAssetLibrary(bool p_templates_only) {
 	sort->set_clip_text(true);
 	sort->connect("item_selected", callable_mp(this, &EditorAssetLibrary::_rerun_search));
 
-	search_hb2->add_child(memnew(VSeparator));
-
 	search_hb2->add_child(memnew(Label(TTR("Category:") + " ")));
 	categories = memnew(OptionButton);
 	categories->add_item(TTR("All"));
@@ -1639,8 +1631,6 @@ EditorAssetLibrary::EditorAssetLibrary(bool p_templates_only) {
 	categories->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	categories->set_clip_text(true);
 	categories->connect("item_selected", callable_mp(this, &EditorAssetLibrary::_rerun_search));
-
-	search_hb2->add_child(memnew(VSeparator));
 
 	search_hb2->add_child(memnew(Label(TTR("Site:") + " ")));
 	repository = memnew(OptionButton);
@@ -1652,8 +1642,6 @@ EditorAssetLibrary::EditorAssetLibrary(bool p_templates_only) {
 	search_hb2->add_child(repository);
 	repository->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	repository->set_clip_text(true);
-
-	search_hb2->add_child(memnew(VSeparator));
 
 	support = memnew(MenuButton);
 	search_hb2->add_child(support);
@@ -1683,7 +1671,7 @@ EditorAssetLibrary::EditorAssetLibrary(bool p_templates_only) {
 
 	PanelContainer *library_vb_border = memnew(PanelContainer);
 	library_scroll->add_child(library_vb_border);
-	library_vb_border->add_theme_style_override("panel", border2);
+	/* library_vb_border->add_theme_style_override("panel", border2); */
 	library_vb_border->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 
 	library_vb = memnew(VBoxContainer);

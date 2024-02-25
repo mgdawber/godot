@@ -1589,37 +1589,6 @@ void EditorThemeManager::_populate_standard_styles(const Ref<EditorTheme> &p_the
 
 void EditorThemeManager::_populate_editor_styles(const Ref<EditorTheme> &p_theme, ThemeConfiguration &p_config) {
 	// Project manager.
-	{
-		p_theme->set_stylebox("project_list", "ProjectManager", p_config.tree_panel_style);
-		p_theme->set_constant("sidebar_button_icon_separation", "ProjectManager", int(6 * EDSCALE));
-
-		// ProjectTag.
-		{
-			p_theme->set_type_variation("ProjectTag", "Button");
-
-			Ref<StyleBoxFlat> tag = p_config.button_style->duplicate();
-			tag->set_bg_color(p_config.dark_theme ? tag->get_bg_color().lightened(0.2) : tag->get_bg_color().darkened(0.2));
-			tag->set_corner_radius(CORNER_TOP_LEFT, 0);
-			tag->set_corner_radius(CORNER_BOTTOM_LEFT, 0);
-			tag->set_corner_radius(CORNER_TOP_RIGHT, 4);
-			tag->set_corner_radius(CORNER_BOTTOM_RIGHT, 4);
-			p_theme->set_stylebox("normal", "ProjectTag", tag);
-
-			tag = p_config.button_style_hover->duplicate();
-			tag->set_corner_radius(CORNER_TOP_LEFT, 0);
-			tag->set_corner_radius(CORNER_BOTTOM_LEFT, 0);
-			tag->set_corner_radius(CORNER_TOP_RIGHT, 4);
-			tag->set_corner_radius(CORNER_BOTTOM_RIGHT, 4);
-			p_theme->set_stylebox("hover", "ProjectTag", tag);
-
-			tag = p_config.button_style_pressed->duplicate();
-			tag->set_corner_radius(CORNER_TOP_LEFT, 0);
-			tag->set_corner_radius(CORNER_BOTTOM_LEFT, 0);
-			tag->set_corner_radius(CORNER_TOP_RIGHT, 4);
-			tag->set_corner_radius(CORNER_BOTTOM_RIGHT, 4);
-			p_theme->set_stylebox("pressed", "ProjectTag", tag);
-		}
-	}
 
 	// Editor and main screen.
 	{
